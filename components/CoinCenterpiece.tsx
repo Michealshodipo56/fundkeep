@@ -7,11 +7,9 @@
  *  3. orbitRing1   — middle ring; rotates CCW 22s
  *  4. orbitRing2   — innermost ring; rotates CW 14s
  *  5. coinDisc     — metallic disc with radial gradient + rim highlight
- *  6. coinEmblem   — Stellar-style swirl / ₢ mark on the disc face
+ *  6. coinEmblem   — Stellar-style swirl mark on the disc face
  *
- * All animations freeze when `prefers-reduced-motion: reduce` is active (via
- * Framer Motion's `useReducedMotion()` hook — transform values stay at their
- * initial state with no transition).
+ * All animations freeze when `prefers-reduced-motion: reduce` is active.
  */
 
 "use client";
@@ -20,41 +18,6 @@ import { useReducedMotion, motion } from "framer-motion";
 
 export default function CoinCenterpiece() {
   const reduce = useReducedMotion();
-
-  const floatY = reduce ? {} : {
-    y: [0, -18, 0],
-    transition: {
-      duration: 4,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop" as const,
-    },
-  };
-
-  const glowPulse = reduce ? {} : {
-    opacity: [0.55, 0.85, 0.55],
-    transition: {
-      duration: 3.5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatType: "loop" as const,
-    },
-  };
-
-  const ring0Rotate = reduce ? {} : {
-    rotate: [0, 360],
-    transition: { duration: 35, ease: "linear", repeat: Infinity },
-  };
-
-  const ring1Rotate = reduce ? {} : {
-    rotate: [0, -360],
-    transition: { duration: 22, ease: "linear", repeat: Infinity },
-  };
-
-  const ring2Rotate = reduce ? {} : {
-    rotate: [0, 360],
-    transition: { duration: 14, ease: "linear", repeat: Infinity },
-  };
 
   return (
     <section
@@ -116,7 +79,7 @@ export default function CoinCenterpiece() {
             <stop offset="100%" stopColor="#e0342a" stopOpacity="0" />
           </linearGradient>
 
-          {/* Blur for glow */}
+          {/* Blur filters */}
           <filter id="blurMed">
             <feGaussianBlur stdDeviation="18" />
           </filter>
@@ -127,7 +90,8 @@ export default function CoinCenterpiece() {
 
         {/* 1. Red glow — breathing */}
         <motion.ellipse
-          animate={glowPulse}
+          animate={reduce ? { opacity: 0.7 } : { opacity: [0.55, 0.85, 0.55] }}
+          transition={reduce ? undefined : { duration: 3.5, repeat: Infinity, repeatType: "loop" }}
           cx="280" cy="195" rx="90" ry="60"
           fill="url(#redGlow)"
           filter="url(#blurMed)"
@@ -135,7 +99,8 @@ export default function CoinCenterpiece() {
 
         {/* 2. Outermost orbit ring */}
         <motion.ellipse
-          animate={ring0Rotate}
+          animate={reduce ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={reduce ? undefined : { duration: 35, repeat: Infinity }}
           style={{ transformOrigin: "280px 220px" }}
           cx="280" cy="220" rx="230" ry="55"
           fill="none"
@@ -147,7 +112,8 @@ export default function CoinCenterpiece() {
 
         {/* 3. Middle orbit ring */}
         <motion.ellipse
-          animate={ring1Rotate}
+          animate={reduce ? { rotate: 0 } : { rotate: [0, -360] }}
+          transition={reduce ? undefined : { duration: 22, repeat: Infinity }}
           style={{ transformOrigin: "280px 218px" }}
           cx="280" cy="218" rx="168" ry="40"
           fill="none"
@@ -158,7 +124,8 @@ export default function CoinCenterpiece() {
 
         {/* 4. Inner orbit ring */}
         <motion.ellipse
-          animate={ring2Rotate}
+          animate={reduce ? { rotate: 0 } : { rotate: [0, 360] }}
+          transition={reduce ? undefined : { duration: 14, repeat: Infinity }}
           style={{ transformOrigin: "280px 215px" }}
           cx="280" cy="215" rx="110" ry="26"
           fill="none"
@@ -170,7 +137,8 @@ export default function CoinCenterpiece() {
 
         {/* 5 & 6. Coin + emblem — floating */}
         <motion.g
-          animate={floatY}
+          animate={reduce ? { y: 0 } : { y: [0, -18, 0] }}
+          transition={reduce ? undefined : { duration: 4, repeat: Infinity, repeatType: "loop" }}
           style={{ transformOrigin: "280px 160px" }}
         >
           {/* Coin disc base */}
@@ -179,20 +147,16 @@ export default function CoinCenterpiece() {
           <circle cx="280" cy="160" r="78" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
           {/* Inner rim */}
           <circle cx="280" cy="160" r="68" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-          {/* Metallic sheen at top-left */}
+          {/* Metallic sheen */}
           <ellipse cx="258" cy="138" rx="22" ry="12" fill="rgba(255,255,255,0.04)" style={{ transform: "rotate(-30deg)", transformOrigin: "258px 138px" }} />
-          {/* Red center glow on coin */}
+          {/* Red center glow */}
           <circle cx="280" cy="160" r="40" fill="url(#redGlow)" filter="url(#blurSm)" opacity="0.55" />
 
           {/* 6. Stellar swirl emblem */}
           <g stroke="rgba(255,255,255,0.75)" strokeWidth="2" strokeLinecap="round" fill="none">
-            {/* Central circle */}
             <circle cx="280" cy="160" r="22" strokeOpacity="0.25" />
-            {/* Main diagonal slash */}
             <line x1="262" y1="178" x2="298" y2="142" strokeOpacity="0.9" />
-            {/* Top-left arc arm */}
             <path d="M 262,178 Q 255,155 268,142" strokeOpacity="0.7" />
-            {/* Bottom-right arc arm */}
             <path d="M 298,142 Q 305,165 292,178" strokeOpacity="0.7" />
           </g>
         </motion.g>

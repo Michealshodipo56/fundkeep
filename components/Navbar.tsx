@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 const navLinks = [
   { label: "Features", href: "#features" },
@@ -64,7 +65,7 @@ export default function Navbar() {
         {/* CTA + hamburger */}
         <div className="flex items-center gap-3">
           <a
-            href="#"
+            href="/auth"
             className="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-red text-white text-sm font-semibold transition-all duration-150 hover:opacity-90 hover:shadow-[0_0_20px_rgba(224,52,42,0.5)] glow-red"
           >
             Launch App
@@ -115,7 +116,7 @@ export default function Navbar() {
                 </a>
               ))}
               <a
-                href="#"
+                href="/auth"
                 className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red text-white text-sm font-semibold glow-red min-h-[44px]"
               >
                 Launch App
