@@ -1,28 +1,36 @@
-# LockSave — Stellar Savings Goal Tracker
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A Soroban smart contract + web app for locking USDC toward a savings goal on Stellar. Funds are only withdrawable once the target amount is reached or the deadline passes — enforced on-chain, not by trust.
+## Getting Started
 
-Built on Stellar's Soroban smart contract platform as a reference example of the locked-funds contract pattern, and as an active open-source project welcoming outside contributors.
+First, run the development server:
 
-## Docs
-- [`PRD.md`](./PRD.md) — what this is and why
-- [`TECHNICAL_SPEC.md`](./TECHNICAL_SPEC.md) — contract design, architecture, security notes
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — how to set up and contribute
-- [`ISSUES.md`](./ISSUES.md) — seed issue list for contributors
-
-## Quickstart
 ```bash
-# contract
-cd contract && soroban contract build && cargo test
-
-# frontend
-cd frontend && npm install && npm run dev
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Requires a [Freighter](https://www.freighter.app/) wallet and a testnet account funded via [Friendbot](https://friendbot.stellar.org).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Status
-🚧 Active development — core contract functions in progress. See [Issues](../../issues) for open work, including items suitable for first-time contributors.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Built with
-Soroban SDK (Rust) · stellar-sdk (JS) · Freighter · Tailwind CSS
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

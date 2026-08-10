@@ -1,0 +1,67 @@
+/* Google Fonts — must be first */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --red: #e0342a;
+    --red-glow: rgba(224, 52, 42, 0.35);
+    --bg: #0a0a0a;
+    --bg-card: #111111;
+    --bg-card-2: #161616;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-red: rgba(224, 52, 42, 0.25);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: #f0f0f0;
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--red);
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  .glow-red {
+    box-shadow: 0 0 20px var(--red-glow), 0 0 40px rgba(224, 52, 42, 0.15);
+  }
+  .glow-red-sm {
+    box-shadow: 0 0 12px var(--red-glow);
+  }
+  .card-border {
+    border: 1px solid var(--border);
+  }
+  .card-border-red {
+    border: 1px solid var(--border-red);
+  }
+  .text-red {
+    color: var(--red);
+  }
+  .bg-red {
+    background-color: var(--red);
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
