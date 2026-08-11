@@ -1,4 +1,4 @@
-# PRD: LockSave — Stellar Savings Goal Tracker
+# PRD: FundKeep — Stellar Savings Goal Tracker
 
 ## 1. Problem
 People struggle to save toward specific goals because funds stay liquid and easy to spend. There's no simple, trustless way to "lock" savings toward a target amount or date on Stellar — you either trust a custodian or trust yourself, and self-trust often fails.

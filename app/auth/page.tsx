@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { connectFreighter, checkFreighterInstalled } from "@/lib/freighter";
+import { useRouter } from "next/navigation";
+import { checkFreighterInstalled } from "@/lib/freighter";
+import { useWallet } from "@/lib/wallet-context";
 
 export default function AuthPage() {
+  const router = useRouter();
+  const { walletAddress, network, setNetwork, connect, isConnecting } = useWallet();
+
   const [freighterInstalled, setFreighterInstalled] = useState<boolean | null>(null);
-  const [connecting, setConnecting] = useState(false);
-  const [stellarAddress, setStellarAddress] = useState<string | null>(null);
-  const [network, setNetwork] = useState<"TESTNET" | "PUBLIC">("TESTNET");
   const [feedback, setFeedback] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
 
   useEffect(() => {
@@ -19,53 +21,37 @@ export default function AuthPage() {
     });
   }, []);
 
+  // If already connected, redirect to dashboard
+  useEffect(() => {
+    if (walletAddress) {
+      router.push("/dashboard");
+    }
+  }, [walletAddress, router]);
+
   const handleConnectFreighter = async () => {
-    setConnecting(true);
     setFeedback(null);
 
-    // Call Freighter API
-    const result = await connectFreighter();
-
-    if (result.success && result.address) {
-      setStellarAddress(result.address);
-      setFeedback({
-        type: "success",
-        text: `Freighter Wallet connected successfully on Stellar ${network}!`,
-      });
-      setConnecting(false);
-      return;
-    }
-
-    // If extension not present or in sandbox environment, offer fallback simulation with clear notification
     if (!freighterInstalled) {
       setFeedback({
         type: "info",
-        text: "Freighter extension not detected in browser. Connecting in demonstration mode...",
+        text: "Freighter extension not detected. Connecting in demonstration mode…",
       });
-    } else if (result.error) {
+    }
+
+    const result = await connect();
+
+    if (result.success) {
       setFeedback({
-        type: "error",
-        text: result.error,
+        type: "success",
+        text: `Connected to Stellar ${network}! Redirecting…`,
       });
-      setConnecting(false);
+      setTimeout(() => router.push("/dashboard"), 800);
       return;
     }
 
-    // Demo Stellar account address
-    const mockAddress = "GAK3X57J29PQR8LMVW7890STUVWXNEON789";
-    setTimeout(() => {
-      setStellarAddress(mockAddress);
-      setFeedback({
-        type: "success",
-        text: `Connected to Stellar ${network} via Freighter Wallet!`,
-      });
-      setConnecting(false);
-    }, 800);
-  };
-
-  const handleDisconnect = () => {
-    setStellarAddress(null);
-    setFeedback(null);
+    if (result.error) {
+      setFeedback({ type: "error", text: result.error });
+    }
   };
 
   return (
@@ -163,104 +149,67 @@ export default function AuthPage() {
             </p>
           </div>
 
-          {/* Connected State vs Connect State */}
-          {stellarAddress ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center flex flex-col gap-3"
+          {/* Connect State (walletAddress is null when on this page) */}
+          <div className="flex flex-col gap-4">
+            {/* Main Connect Button */}
+            <button
+              type="button"
+              id="connect-freighter-btn"
+              onClick={handleConnectFreighter}
+              disabled={isConnecting}
+              className="w-full py-4 px-5 rounded-xl bg-red text-white text-sm font-bold transition-all hover:opacity-95 hover:shadow-[0_0_32px_rgba(224,52,42,0.6)] glow-red flex items-center justify-center gap-3 group relative overflow-hidden min-h-[54px]"
             >
-              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-lg font-bold">
-                ✓
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Freighter Wallet Connected</p>
-                <p className="text-[11px] text-emerald-400 font-medium">Verified on Stellar {network}</p>
-              </div>
-              <div className="bg-black/60 p-3 rounded-xl border border-white/5 text-left">
-                <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1">
-                  Public Key (G-Address)
-                </p>
-                <p className="text-xs font-mono text-white/90 break-all">{stellarAddress}</p>
-              </div>
-
-              <div className="flex gap-2 mt-1">
-                <Link
-                  href="/dashboard"
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-red text-white text-xs font-semibold glow-red hover:opacity-90 transition-all text-center"
-                >
-                  Go to App
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleDisconnect}
-                  className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-xs font-medium transition-all"
-                >
-                  Disconnect
-                </button>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {/* Main Connect Button */}
-              <button
-                type="button"
-                onClick={handleConnectFreighter}
-                disabled={connecting}
-                className="w-full py-4 px-5 rounded-xl bg-red text-white text-sm font-bold transition-all hover:opacity-95 hover:shadow-[0_0_32px_rgba(224,52,42,0.6)] glow-red flex items-center justify-center gap-3 group relative overflow-hidden min-h-[54px]"
-              >
-                {connecting ? (
-                  <>
-                    <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                    <span>Connecting Freighter...</span>
-                  </>
-                ) : (
-                  <>
-                    {/* Official Freighter Rocket Mark */}
-                    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" className="shrink-0">
-                      <path
-                        d="M16 4 C20 4 24 8 24 14 L24 20 L16 28 L8 20 L8 14 C8 8 12 4 16 4Z"
-                        stroke="white"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <path d="M13 20 L16 28 L19 20" stroke="white" strokeWidth="2" strokeLinejoin="round" />
-                      <circle cx="16" cy="14" r="3.5" fill="white" />
-                    </svg>
-                    <span>Connect Freighter Wallet</span>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
+              {isConnecting ? (
+                <>
+                  <span className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  <span>Connecting Freighter…</span>
+                </>
+              ) : (
+                <>
+                  {/* Official Freighter Rocket Mark */}
+                  <svg width="24" height="24" viewBox="0 0 32 32" fill="none" className="shrink-0">
+                    <path
+                      d="M16 4 C20 4 24 8 24 14 L24 20 L16 28 L8 20 L8 14 C8 8 12 4 16 4Z"
+                      stroke="white"
+                      strokeWidth="2"
                       fill="none"
-                      className="ml-auto opacity-70 group-hover:translate-x-1 transition-transform"
-                    >
-                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </>
-                )}
-              </button>
+                    />
+                    <path d="M13 20 L16 28 L19 20" stroke="white" strokeWidth="2" strokeLinejoin="round" />
+                    <circle cx="16" cy="14" r="3.5" fill="white" />
+                  </svg>
+                  <span>Connect Freighter Wallet</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="ml-auto opacity-70 group-hover:translate-x-1 transition-transform"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </>
+              )}
+            </button>
 
-              {/* Status helper text */}
-              <div className="flex items-center justify-between px-1 text-[11px] text-white/40">
-                <span>
-                  {freighterInstalled === true
-                    ? "✓ Freighter extension ready"
-                    : freighterInstalled === false
-                    ? "Freighter extension not installed"
-                    : "Detecting extension..."}
-                </span>
-                <a
-                  href="https://www.freighter.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-red hover:underline flex items-center gap-1"
-                >
-                  Get Freighter ↗
-                </a>
-              </div>
+            {/* Status helper text */}
+            <div className="flex items-center justify-between px-1 text-[11px] text-white/40">
+              <span>
+                {freighterInstalled === true
+                  ? "✓ Freighter extension ready"
+                  : freighterInstalled === false
+                  ? "Freighter extension not installed"
+                  : "Detecting extension…"}
+              </span>
+              <a
+                href="https://www.freighter.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-red hover:underline flex items-center gap-1"
+              >
+                Get Freighter ↗
+              </a>
             </div>
-          )}
+          </div>
 
           {/* Feedback banner */}
           {feedback && (
