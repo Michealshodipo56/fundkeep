@@ -344,13 +344,13 @@ export default function DashboardPage() {
             </button>
 
             {/* Create New Goal Button */}
-            <button
-              onClick={() => setCreateModalOpen(true)}
+            <Link
+              href="/goals/create"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red text-white text-xs sm:text-sm font-semibold transition-all hover:opacity-90 hover:shadow-[0_0_20px_rgba(224,52,42,0.4)] glow-red"
             >
               <span className="text-base font-bold">+</span>
               Create New Goal
-            </button>
+            </Link>
           </div>
         </header>
 
