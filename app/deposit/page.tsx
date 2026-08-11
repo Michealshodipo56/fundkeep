@@ -142,7 +142,7 @@ export default function DepositPage() {
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/goals"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -151,16 +151,6 @@ export default function DepositPage() {
                 <circle cx="12" cy="12" r="1.5" fill="currentColor" />
               </svg>
               My Goals
-            </Link>
-
-            <Link
-              href="/goals/create"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
-            >
-              <div className="w-5 h-5 rounded-full bg-white/10 text-white/70 flex items-center justify-center text-xs font-bold shrink-0">
-                +
-              </div>
-              Create Goal
             </Link>
 
             {/* Active Deposit Item */}
@@ -193,7 +183,7 @@ export default function DepositPage() {
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/settings"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
