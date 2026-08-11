@@ -186,7 +186,7 @@ export default function AuthPage() {
 
               <div className="flex gap-2 mt-1">
                 <Link
-                  href="/#hero"
+                  href="/dashboard"
                   className="flex-1 py-2.5 px-3 rounded-xl bg-red text-white text-xs font-semibold glow-red hover:opacity-90 transition-all text-center"
                 >
                   Go to App
