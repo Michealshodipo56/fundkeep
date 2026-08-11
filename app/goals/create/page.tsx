@@ -109,7 +109,7 @@ export default function CreateGoalPage() {
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/goals"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -120,16 +120,8 @@ export default function CreateGoalPage() {
               My Goals
             </Link>
 
-            {/* Active Create Goal Item */}
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]">
-              <div className="w-5 h-5 rounded-full bg-red text-white flex items-center justify-center text-xs font-bold shrink-0">
-                +
-              </div>
-              Create Goal
-            </div>
-
             <Link
-              href="/dashboard"
+              href="/deposit"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -140,7 +132,7 @@ export default function CreateGoalPage() {
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/activity"
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

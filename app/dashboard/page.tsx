@@ -4,8 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
-// Type definitions
-type NavItem = "dashboard" | "goals" | "deposit" | "activity" | "analytics" | "settings";
 
 interface Goal {
   id: string;
@@ -48,7 +46,6 @@ const initialGoals: Goal[] = [
 ];
 
 export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<NavItem>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
@@ -147,18 +144,10 @@ export default function DashboardPage() {
 
           {/* Nav Items */}
           <nav className="flex flex-col gap-1.5" aria-label="Sidebar navigation">
-            <button
-              onClick={() => {
-                setActiveTab("dashboard");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "dashboard"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)] transition-all"
             >
-              {/* Dashboard Grid Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="7" height="7" rx="1.5" strokeLinecap="round" />
                 <rect x="14" y="3" width="7" height="7" rx="1.5" strokeLinecap="round" />
@@ -166,101 +155,61 @@ export default function DashboardPage() {
                 <rect x="3" y="14" width="7" height="7" rx="1.5" strokeLinecap="round" />
               </svg>
               Dashboard
-            </button>
+            </Link>
 
-            <button
-              onClick={() => {
-                setActiveTab("goals");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "goals"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/goals"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
-              {/* Target / Goals Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="9" />
                 <circle cx="12" cy="12" r="5" />
                 <circle cx="12" cy="12" r="1.5" fill="currentColor" />
               </svg>
               My Goals
-            </button>
+            </Link>
 
-            <button
-              onClick={() => {
-                setActiveTab("deposit");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "deposit"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/deposit"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
-              {/* Deposit Wallet Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="5" width="18" height="14" rx="2" />
                 <path d="M16 12h2" strokeLinecap="round" />
               </svg>
               Deposit
-            </button>
+            </Link>
 
-            <button
-              onClick={() => {
-                setActiveTab("activity");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "activity"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/activity"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
-              {/* Activity List Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" />
               </svg>
               Activity
-            </button>
+            </Link>
 
-            <button
-              onClick={() => {
-                setActiveTab("analytics");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "analytics"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
-              {/* Analytics Chart Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Analytics
-            </button>
+            </Link>
 
-            <button
-              onClick={() => {
-                setActiveTab("settings");
-                setSidebarOpen(false);
-              }}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                activeTab === "settings"
-                  ? "bg-red/15 text-white border border-red/30 shadow-[0_0_15px_rgba(224,52,42,0.15)]"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
-              }`}
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-white/60 hover:text-white hover:bg-white/5 transition-all"
             >
-              {/* Settings Gear Icon */}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
               Settings
-            </button>
+            </Link>
           </nav>
         </div>
 
@@ -433,12 +382,12 @@ export default function DashboardPage() {
           <section className="lg:col-span-2 flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-white tracking-tight">My Goals</h2>
-              <button
-                onClick={() => setActiveTab("goals")}
+              <Link
+                href="/goals"
                 className="text-xs text-red font-semibold hover:underline flex items-center gap-1"
               >
                 View all goals →
-              </button>
+              </Link>
             </div>
 
             <div className="flex flex-col gap-3.5">
