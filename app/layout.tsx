@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   description:
     "FundKeep helps you lock USDC toward a savings goal on Stellar. Your funds stay secure and are only withdrawable when your target is reached or the deadline passes — enforced on-chain, not by trust.",
   keywords: ["savings", "USDC", "Stellar", "Soroban", "blockchain", "DeFi", "goal"],
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
     title: "FundKeep — Lock Your Savings. Reach Your Goals.",
     description: "On-chain savings goals powered by Stellar & Soroban.",
