@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useWallet } from "@/lib/wallet-context";
 
-type TabType = "profile" | "security" | "preferences" | "notifications" | "billing" | "apikeys";
+type TabType = "profile" | "preferences" | "security";
+
+function shortAddress(addr: string): string {
+  if (addr.length <= 10) return addr;
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+}
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { walletAddress, network, setNetwork, disconnect, stats } = useWallet();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -14,20 +24,27 @@ export default function SettingsPage() {
   // Form states
   const [currency, setCurrency] = useState("USDC");
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [network, setNetwork] = useState("Stellar Testnet");
   const [animations, setAnimations] = useState(true);
-  const [compactMode, setCompactMode] = useState(false);
 
   // Edit Profile modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [fullName, setFullName] = useState("John Doe");
   const [email, setEmail] = useState("johndoe@example.com");
 
-  const handleCopyWallet = () => {
-    navigator.clipboard?.writeText("GAB3X57J29PQR8LMVW7890STUVWX5Z3K");
-    setCopiedWallet(true);
-    setTimeout(() => setCopiedWallet(false), 2000);
-  };
+  const handleCopyWallet = useCallback(() => {
+    if (walletAddress) {
+      navigator.clipboard?.writeText(walletAddress);
+      setCopiedWallet(true);
+      setTimeout(() => setCopiedWallet(false), 2000);
+    }
+  }, [walletAddress]);
+
+  const handleDisconnect = useCallback(() => {
+    disconnect();
+    router.push("/auth");
+  }, [disconnect, router]);
+
+  const displayAddress = walletAddress ? shortAddress(walletAddress) : "Not Connected";
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white flex flex-col md:flex-row selection:bg-red selection:text-white font-sans">
@@ -156,7 +173,7 @@ export default function SettingsPage() {
             <p className="text-[11px] font-semibold text-white/50 mb-1">Connected Wallet</p>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-white tracking-wide">
-                GAB...5Z3K
+                {displayAddress}
               </span>
               <button
                 onClick={handleCopyWallet}
@@ -175,13 +192,13 @@ export default function SettingsPage() {
             </div>
             <div className="flex items-center gap-1.5 mt-2 text-[10px] text-emerald-400 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Testnet
+              {network}
             </div>
           </div>
 
-          <Link
-            href="/auth"
-            className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-red/30 bg-red/10 hover:bg-red/20 text-red text-xs font-semibold transition-colors"
+          <button
+            onClick={handleDisconnect}
+            className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-red/30 bg-red/10 hover:bg-red/20 text-red text-xs font-semibold transition-colors w-full"
           >
             <span>Disconnect</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -189,7 +206,7 @@ export default function SettingsPage() {
               <polyline points="16 17 21 12 16 7" strokeLinecap="round" strokeLinejoin="round" />
               <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round" />
             </svg>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -212,38 +229,14 @@ export default function SettingsPage() {
               Manage your account, preferences, and security.
             </p>
           </div>
-
-          <div className="flex items-center gap-3 self-start sm:self-auto">
-            <button className="relative w-10 h-10 rounded-xl bg-[#161616] border border-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red ring-2 ring-[#161616]" />
-            </button>
-
-            <a
-              href="#docs"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs sm:text-sm font-semibold transition-all"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-              View Docs
-            </a>
-          </div>
         </header>
 
         {/* SUB-TABS BAR */}
         <div className="flex items-center gap-6 border-b border-white/10 overflow-x-auto scrollbar-none pb-2 text-xs font-semibold">
           {[
             { id: "profile", label: "Profile" },
-            { id: "security", label: "Security" },
             { id: "preferences", label: "Preferences" },
-            { id: "notifications", label: "Notifications" },
-            { id: "billing", label: "Billing" },
-            { id: "apikeys", label: "API Keys" },
+            { id: "security", label: "Security" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -278,19 +271,13 @@ export default function SettingsPage() {
                   onClick={() => setEditModalOpen(true)}
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/80 hover:text-white text-xs font-semibold transition-all"
                 >
-                  <span>✏️</span> Edit Profile
+                  Edit Profile
                 </button>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 pt-2">
-                {/* Avatar with Camera Icon Overlay */}
-                <div className="relative group cursor-pointer shrink-0">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red/60 via-red to-[#5a120e] flex items-center justify-center text-white text-2xl font-extrabold shadow-[0_0_25px_rgba(224,52,42,0.4)]">
-                    JD
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-black/80 border border-white/20 flex items-center justify-center text-[10px] text-white/80 group-hover:scale-110 transition-transform">
-                    📷
-                  </div>
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red/60 via-red to-[#5a120e] flex items-center justify-center text-white text-2xl font-extrabold shadow-[0_0_25px_rgba(224,52,42,0.4)]">
+                  {fullName.split(" ").map((n) => n[0]).join("")}
                 </div>
 
                 <div className="flex flex-col gap-2 text-center sm:text-left flex-1">
@@ -301,33 +288,21 @@ export default function SettingsPage() {
 
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                     <span className="px-2.5 py-1 rounded-lg bg-black/50 border border-white/10 text-xs font-mono text-white/80 flex items-center gap-1.5">
-                      GAB...5Z3K
-                      <button onClick={handleCopyWallet} className="hover:text-white">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="9" y="9" width="13" height="13" rx="2" />
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                        </svg>
-                      </button>
+                      {displayAddress}
+                      {walletAddress && (
+                        <button onClick={handleCopyWallet} className="hover:text-white">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        </button>
+                      )}
                     </span>
 
                     <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
-                      Testnet
+                      {network}
                     </span>
                   </div>
-                </div>
-              </div>
-
-              {/* Sub-bar: Member Since & Account Type */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5 text-xs">
-                <div>
-                  <p className="text-white/40 text-[11px]">Member Since</p>
-                  <p className="font-semibold text-white mt-0.5">Jan 15, 2026</p>
-                </div>
-                <div>
-                  <p className="text-white/40 text-[11px]">Account Type</p>
-                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-red/20 text-red border border-red/30">
-                    Basic
-                  </span>
                 </div>
               </div>
             </div>
@@ -336,20 +311,15 @@ export default function SettingsPage() {
             <div className="rounded-2xl bg-[#141414] border border-white/10 p-6 flex flex-col gap-6 shadow-xl">
               <div>
                 <h2 className="text-base font-bold text-white tracking-tight">Preferences</h2>
-                <p className="text-xs text-white/40 mt-0.5">Customize your experience on LockSave.</p>
+                <p className="text-xs text-white/40 mt-0.5">Customize your experience on FundKeep.</p>
               </div>
 
               <div className="flex flex-col gap-5 text-xs">
                 {/* Setting 1: Currency */}
                 <div className="flex items-center justify-between gap-4 py-2 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                      ☺
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Currency</p>
-                      <p className="text-white/40 text-[11px]">Choose your preferred currency for displaying amounts.</p>
-                    </div>
+                  <div>
+                    <p className="font-bold text-white">Currency</p>
+                    <p className="text-white/40 text-[11px]">Display currency preference.</p>
                   </div>
                   <select
                     value={currency}
@@ -358,76 +328,42 @@ export default function SettingsPage() {
                   >
                     <option value="USDC">USDC</option>
                     <option value="XLM">XLM</option>
-                    <option value="USD">USD ($)</option>
                   </select>
                 </div>
 
-                {/* Setting 2: Theme */}
+                {/* Setting 2: Default Network */}
                 <div className="flex items-center justify-between gap-4 py-2 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                      ⚙
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Theme</p>
-                      <p className="text-white/40 text-[11px]">Select your preferred theme for the dashboard.</p>
-                    </div>
+                  <div>
+                    <p className="font-bold text-white">Stellar Network</p>
+                    <p className="text-white/40 text-[11px]">Toggle active network environment.</p>
                   </div>
-                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10">
+                  <div className="flex items-center p-0.5 rounded-lg bg-black/50 border border-white/5 text-[10px] font-bold">
                     <button
-                      onClick={() => setTheme("dark")}
-                      className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                        theme === "dark"
-                          ? "bg-red/20 text-white border border-red/40"
-                          : "text-white/40 hover:text-white"
+                      type="button"
+                      onClick={() => setNetwork("TESTNET")}
+                      className={`px-3 py-1 rounded-md transition-colors ${
+                        network === "TESTNET" ? "bg-red text-white" : "text-white/40 hover:text-white"
                       }`}
                     >
-                      🌙 Dark
+                      TESTNET
                     </button>
                     <button
-                      onClick={() => setTheme("light")}
-                      className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center gap-1.5 ${
-                        theme === "light"
-                          ? "bg-red/20 text-white border border-red/40"
-                          : "text-white/40 hover:text-white"
+                      type="button"
+                      onClick={() => setNetwork("PUBLIC")}
+                      className={`px-3 py-1 rounded-md transition-colors ${
+                        network === "PUBLIC" ? "bg-red text-white" : "text-white/40 hover:text-white"
                       }`}
                     >
-                      ☀️ Light
+                      MAINNET
                     </button>
                   </div>
                 </div>
 
-                {/* Setting 3: Default Network */}
-                <div className="flex items-center justify-between gap-4 py-2 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                      🕸
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Default Network</p>
-                      <p className="text-white/40 text-[11px]">Choose the default blockchain network.</p>
-                    </div>
-                  </div>
-                  <select
-                    value={network}
-                    onChange={(e) => setNetwork(e.target.value)}
-                    className="bg-black/60 border border-white/10 text-xs text-white rounded-xl px-3.5 py-2 focus:outline-none focus:border-red"
-                  >
-                    <option value="Stellar Testnet">Stellar Testnet</option>
-                    <option value="Stellar Mainnet">Stellar Mainnet</option>
-                  </select>
-                </div>
-
-                {/* Setting 4: Animations Switch */}
-                <div className="flex items-center justify-between gap-4 py-2 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                      ⚡
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Animations</p>
-                      <p className="text-white/40 text-[11px]">Enable interface animations and transitions.</p>
-                    </div>
+                {/* Setting 3: Animations Switch */}
+                <div className="flex items-center justify-between gap-4 py-2">
+                  <div>
+                    <p className="font-bold text-white">Animations</p>
+                    <p className="text-white/40 text-[11px]">Enable interface transitions.</p>
                   </div>
                   <button
                     onClick={() => setAnimations(!animations)}
@@ -442,257 +378,40 @@ export default function SettingsPage() {
                     />
                   </button>
                 </div>
-
-                {/* Setting 5: Compact Mode Switch */}
-                <div className="flex items-center justify-between gap-4 py-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
-                      🖥
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Compact Mode</p>
-                      <p className="text-white/40 text-[11px]">Use a more compact layout for more content.</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setCompactMode(!compactMode)}
-                    className={`w-12 h-6 rounded-full transition-colors relative p-1 ${
-                      compactMode ? "bg-red" : "bg-white/10"
-                    }`}
-                  >
-                    <span
-                      className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                        compactMode ? "translate-x-6" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* CARD 3: DANGER ZONE */}
-            <div className="rounded-2xl bg-[#141414] border border-white/10 p-6 flex flex-col gap-4 shadow-xl">
-              <div>
-                <h2 className="text-base font-bold text-red tracking-tight">Danger Zone</h2>
-                <p className="text-xs text-white/40 mt-0.5">Irreversible and sensitive actions.</p>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 pt-2">
-                <div>
-                  <p className="text-xs font-bold text-red">Delete Account</p>
-                  <p className="text-white/40 text-[11px]">Permanently delete your account and all associated data.</p>
-                </div>
-
-                <button className="px-4 py-2 rounded-xl border border-red/40 bg-red/10 hover:bg-red/20 text-red text-xs font-bold transition-all flex items-center gap-1.5">
-                  🗑 Delete Account
-                </button>
               </div>
             </div>
           </section>
 
-          {/* RIGHT 4 COLUMNS: WIDGETS */}
+          {/* RIGHT 4 COLUMNS: ACCOUNT SUMMARY */}
           <section className="lg:col-span-4 flex flex-col gap-6">
-            {/* WIDGET 1: ACCOUNT SUMMARY */}
             <div className="rounded-2xl bg-[#141414] border border-white/10 p-5 flex flex-col gap-4 shadow-xl">
-              <div className="flex items-center gap-2 text-white">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                  <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                </svg>
-                <h3 className="text-base font-bold tracking-tight">Account Summary</h3>
-              </div>
+              <h3 className="text-base font-bold text-white tracking-tight">Account Summary</h3>
 
               <div className="flex flex-col gap-2.5 text-xs pt-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/40">Total Goals</span>
-                  <span className="font-bold text-white">12</span>
+                  <span className="text-white/40">Active Goals</span>
+                  <span className="font-bold text-white">{stats.activeGoals}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/40">Completed Goals</span>
-                  <span className="font-bold text-white">7</span>
+                  <span className="font-bold text-white">{stats.completedGoals}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/40">Total Saved</span>
-                  <span className="font-bold text-white">1,250.00 USDC</span>
+                  <span className="font-bold text-white">
+                    {stats.totalSaved.toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/40">Total Locked</span>
-                  <span className="font-bold text-white">1,125.00 USDC</span>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                  <span className="text-white/40">Member Since</span>
-                  <span className="font-semibold text-white/80">Jan 15, 2026</span>
-                </div>
-              </div>
-            </div>
-
-            {/* WIDGET 2: SECURITY */}
-            <div className="rounded-2xl bg-[#141414] border border-white/10 p-5 flex flex-col gap-4 shadow-xl">
-              <div>
-                <div className="flex items-center gap-2 text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
-                  <h3 className="text-base font-bold tracking-tight">Security</h3>
-                </div>
-                <p className="text-[11px] text-white/40 mt-0.5">Keep your account safe and secure.</p>
-              </div>
-
-              <div className="flex flex-col gap-3 text-xs">
-                {/* 2FA */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
-                      ⏱
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Two-Factor Authentication</p>
-                      <p className="text-[10px] text-white/40">Add an extra layer of security.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-red/20 text-red border border-red/30">
-                      Not Enabled
-                    </span>
-                    <span className="text-white/40 text-xs">›</span>
-                  </div>
-                </div>
-
-                {/* Change Password */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
-                      🔒
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Change Password</p>
-                      <p className="text-[10px] text-white/40">Update your account password.</p>
-                    </div>
-                  </div>
-                  <span className="text-white/40 text-xs">›</span>
-                </div>
-
-                {/* Active Sessions */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
-                      💻
-                    </div>
-                    <div>
-                      <p className="font-bold text-white">Active Sessions</p>
-                      <p className="text-[10px] text-white/40">Manage your active sessions.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      2 Active
-                    </span>
-                    <span className="text-white/40 text-xs">›</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* WIDGET 3: CONNECTED WALLET */}
-            <div className="rounded-2xl bg-[#141414] border border-white/10 p-5 flex flex-col gap-4 shadow-xl">
-              <div>
-                <div className="flex items-center gap-2 text-white">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                    <path d="M16 12h2" />
-                  </svg>
-                  <h3 className="text-base font-bold tracking-tight">Connected Wallet</h3>
-                </div>
-                <p className="text-[11px] text-white/40 mt-0.5">Manage your connected wallet.</p>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-black/50 border border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
-                    S
-                  </div>
-                  <div>
-                    <p className="text-xs font-mono font-bold text-white">GAB...5Z3K</p>
-                    <p className="text-[10px] text-emerald-400 font-medium">● Stellar Testnet</p>
-                  </div>
-                </div>
-                <button onClick={handleCopyWallet} className="text-white/40 hover:text-white">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* WIDGET 4: INTEGRATIONS */}
-            <div className="rounded-2xl bg-[#141414] border border-white/10 p-5 flex flex-col gap-4 shadow-xl">
-              <div>
-                <h3 className="text-base font-bold text-white tracking-tight">Integrations</h3>
-                <p className="text-[11px] text-white/40 mt-0.5">Manage third-party integrations.</p>
-              </div>
-
-              <div className="flex items-center justify-between text-xs p-3 rounded-xl bg-black/40 border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/70">
-                    🔌
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">Ledger</p>
-                    <p className="text-[10px] text-white/40">Connect your Ledger hardware wallet.</p>
-                  </div>
-                </div>
-                <button className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold">
-                  Connect
-                </button>
-              </div>
-            </div>
-
-            {/* WIDGET 5: HELP & SUPPORT */}
-            <div className="rounded-2xl bg-[#141414] border border-white/10 p-5 flex flex-col gap-4 shadow-xl">
-              <div>
-                <h3 className="text-base font-bold text-white tracking-tight">Help & Support</h3>
-                <p className="text-[11px] text-white/40 mt-0.5">Need help? We&apos;re here for you.</p>
-              </div>
-
-              <div className="flex flex-col gap-2 text-xs">
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-white/60">📄</span>
-                    <div>
-                      <p className="font-bold text-white">Documentation</p>
-                      <p className="text-[10px] text-white/40">Browse our guides and FAQs.</p>
-                    </div>
-                  </div>
-                  <span className="text-white/40 text-xs">›</span>
-                </div>
-
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all cursor-pointer">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-white/60">💬</span>
-                    <div>
-                      <p className="font-bold text-white">Contact Support</p>
-                      <p className="text-[10px] text-white/40">Get help from our support team.</p>
-                    </div>
-                  </div>
-                  <span className="text-white/40 text-xs">›</span>
+                  <span className="font-bold text-white">
+                    {stats.lockedFunds.toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC
+                  </span>
                 </div>
               </div>
             </div>
           </section>
         </div>
-
-        {/* FOOTER */}
-        <footer className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-white/40">
-          <p>FundKeep © 2026. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <a href="#terms" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a>
-          </div>
-        </footer>
       </main>
 
       {/* EDIT PROFILE MODAL */}

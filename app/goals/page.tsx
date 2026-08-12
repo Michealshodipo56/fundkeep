@@ -1,71 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useWallet, type SavingsGoal } from "@/lib/wallet-context";
 
-interface Goal {
-  id: string;
-  title: string;
-  category: "laptop" | "camera" | "travel" | "other";
-  deadline: string;
-  saved: number;
-  target: number;
-  status: "LOCKED" | "UNLOCKED";
+function shortAddress(addr: string): string {
+  if (addr.length <= 10) return addr;
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
 }
 
-const goalsData: Goal[] = [
-  {
-    id: "1",
-    title: "Buy a New Laptop",
-    category: "laptop",
-    deadline: "Dec 30, 2026",
-    saved: 1250.0,
-    target: 1500.0,
-    status: "LOCKED",
-  },
-  {
-    id: "2",
-    title: "New Camera Gear",
-    category: "camera",
-    deadline: "Sep 15, 2026",
-    saved: 450.0,
-    target: 800.0,
-    status: "LOCKED",
-  },
-  {
-    id: "3",
-    title: "Trip to Japan",
-    category: "travel",
-    deadline: "May 10, 2026",
-    saved: 1800.0,
-    target: 1800.0,
-    status: "UNLOCKED",
-  },
-  {
-    id: "4",
-    title: "Emergency Fund",
-    category: "other",
-    deadline: "Jan 15, 2027",
-    saved: 3200.0,
-    target: 5000.0,
-    status: "LOCKED",
-  },
-];
+function formatDeadline(isoDate: string): string {
+  try {
+    const d = new Date(isoDate);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return isoDate;
+  }
+}
 
 export default function GoalsPage() {
+  const router = useRouter();
+  const {
+    walletAddress,
+    network,
+    disconnect,
+    goals,
+    withdrawGoal,
+  } = useWallet();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [copiedWallet, setCopiedWallet] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | "locked" | "unlocked">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleCopyWallet = () => {
-    navigator.clipboard?.writeText("GAB3X57J29PQR8LMVW7890STUVWX5Z3K");
-    setCopiedWallet(true);
-    setTimeout(() => setCopiedWallet(false), 2000);
-  };
+  const handleCopyWallet = useCallback(() => {
+    if (walletAddress) {
+      navigator.clipboard?.writeText(walletAddress);
+      setCopiedWallet(true);
+      setTimeout(() => setCopiedWallet(false), 2000);
+    }
+  }, [walletAddress]);
 
-  const filteredGoals = goalsData.filter((goal) => {
+  const handleDisconnect = useCallback(() => {
+    disconnect();
+    router.push("/auth");
+  }, [disconnect, router]);
+
+  const filteredGoals = goals.filter((goal) => {
     const matchesFilter =
       activeFilter === "all" ||
       (activeFilter === "locked" && goal.status === "LOCKED") ||
@@ -73,6 +56,8 @@ export default function GoalsPage() {
     const matchesSearch = goal.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  const displayAddress = walletAddress ? shortAddress(walletAddress) : "Not Connected";
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white flex flex-col md:flex-row selection:bg-red selection:text-white font-sans">
@@ -201,7 +186,7 @@ export default function GoalsPage() {
             <p className="text-[11px] font-semibold text-white/50 mb-1">Connected Wallet</p>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-white tracking-wide">
-                GAB...5Z3K
+                {displayAddress}
               </span>
               <button
                 onClick={handleCopyWallet}
@@ -220,13 +205,13 @@ export default function GoalsPage() {
             </div>
             <div className="flex items-center gap-1.5 mt-2 text-[10px] text-emerald-400 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Testnet
+              {network}
             </div>
           </div>
 
-          <Link
-            href="/auth"
-            className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-red/30 bg-red/10 hover:bg-red/20 text-red text-xs font-semibold transition-colors"
+          <button
+            onClick={handleDisconnect}
+            className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-red/30 bg-red/10 hover:bg-red/20 text-red text-xs font-semibold transition-colors w-full"
           >
             <span>Disconnect</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -234,7 +219,7 @@ export default function GoalsPage() {
               <polyline points="16 17 21 12 16 7" strokeLinecap="round" strokeLinejoin="round" />
               <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round" />
             </svg>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -337,7 +322,7 @@ export default function GoalsPage() {
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-white">{goal.title}</h3>
-                        <p className="text-xs text-white/40 mt-0.5">Deadline: {goal.deadline}</p>
+                        <p className="text-xs text-white/40 mt-0.5">Deadline: {formatDeadline(goal.deadline)}</p>
                       </div>
                     </div>
 
@@ -345,7 +330,9 @@ export default function GoalsPage() {
                       className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         goal.status === "LOCKED"
                           ? "bg-red/20 text-red border border-red/30"
-                          : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : goal.status === "UNLOCKED"
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-white/10 text-white/70 border border-white/15"
                       }`}
                     >
                       {goal.status}
@@ -373,19 +360,25 @@ export default function GoalsPage() {
                 </div>
 
                 <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                  <Link
-                    href="/deposit"
-                    className="flex-1 py-2 px-3 rounded-xl bg-red/10 border border-red/30 hover:bg-red/20 text-red text-xs font-bold text-center transition-colors"
-                  >
-                    Deposit USDC
-                  </Link>
-                  <button className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white/60 hover:text-white transition-colors">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="1" />
-                      <circle cx="19" cy="12" r="1" />
-                      <circle cx="5" cy="12" r="1" />
-                    </svg>
-                  </button>
+                  {goal.status === "UNLOCKED" ? (
+                    <button
+                      onClick={() => withdrawGoal(goal.id)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 hover:bg-emerald-500/30 text-emerald-400 text-xs font-bold text-center transition-colors"
+                    >
+                      Withdraw Funds
+                    </button>
+                  ) : goal.status === "WITHDRAWN" ? (
+                    <span className="flex-1 py-2 px-3 text-xs text-white/40 font-semibold text-center">
+                      Withdrawn
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/deposit?goalId=${goal.id}`}
+                      className="flex-1 py-2 px-3 rounded-xl bg-red/10 border border-red/30 hover:bg-red/20 text-red text-xs font-bold text-center transition-colors"
+                    >
+                      Deposit USDC
+                    </Link>
+                  )}
                 </div>
               </motion.div>
             );
