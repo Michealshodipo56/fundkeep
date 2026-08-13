@@ -1,5 +1,51 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="8" fill="#111111"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="#E0342A" stroke-opacity="0.4"/>
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M16 6C13.2386 6 11 8.23858 11 11V13H9C7.89543 13 7 13.8954 7 15V23C7 24.1046 7.89543 25 9 25H23C24.1046 25 25 24.1046 25 23V15C25 13.8954 24.1046 13 23 13H21V11C21 8.23858 18.7614 6 16 6ZM19 11V13H13V11C13 9.34315 14.3431 8 16 8C17.6569 8 19 9.34315 19 11ZM16 17C14.8954 17 14 17.8954 14 19C14 20.1046 14.8954 21 16 21C17.1046 21 18 20.1046 18 19C18 17.8954 17.1046 17 16 17Z" fill="#E0342A"/>
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a0a0a"/>
+      <stop offset="100%" stop-color="#0d0606"/>
+    </linearGradient>
+    <linearGradient id="lockGrad" x1="10" y1="6" x2="22" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff5a4f"/>
+      <stop offset="100%" stop-color="#c0251b"/>
+    </linearGradient>
+    <linearGradient id="shackleGrad" x1="13" y1="6" x2="19" y2="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff6b60"/>
+      <stop offset="100%" stop-color="#d63028"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="7" fill="url(#bgGrad)"/>
+
+  <!-- Subtle border glow -->
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" stroke="#e0342a" stroke-opacity="0.5" stroke-width="0.75"/>
+
+  <!-- Lock body (rounded rectangle) -->
+  <rect x="8" y="15" width="16" height="12" rx="2.5" fill="url(#lockGrad)" filter="url(#glow)"/>
+
+  <!-- Shackle (top arc of the lock) -->
+  <path
+    d="M13 15V11.5C13 9.567 14.343 8 16 8C17.657 8 19 9.567 19 11.5V15"
+    stroke="url(#shackleGrad)"
+    stroke-width="2.25"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Keyhole circle -->
+  <circle cx="16" cy="20.5" r="2" fill="#0d0606" opacity="0.9"/>
+
+  <!-- Keyhole notch -->
+  <rect x="15.15" y="21.5" width="1.7" height="2.2" rx="0.5" fill="#0d0606" opacity="0.9"/>
+
+  <!-- Coin sparkle top-right ($ symbol hint) -->
+  <circle cx="25" cy="8" r="4" fill="#1c1010" stroke="#e0342a" stroke-opacity="0.7" stroke-width="0.75"/>
+  <text x="25" y="10.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="5.5" font-weight="700" fill="#e0342a" opacity="0.95">$</text>
 </svg>
